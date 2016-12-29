@@ -13,7 +13,7 @@ static const float    resize_keep_aspect_ratio= 1.03;
 ///---Offsets---///
 /*0)offsetx          1)offsety
  *2)maxwidth         3)maxheight */
-static const uint8_t offsets[] = {0,0,0,0};
+static const uint8_t offsets[] = {18,18,36,41};
 ///---Colors---///
 /*0)focuscol         1)unfocuscol
  *2)fixedcol         3)unkilcol
@@ -27,27 +27,26 @@ static const bool inverted_colors = true;
  * correct values are:
  * TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT, MIDDLE
  * All these are relative to the current window. */
-#define CURSOR_POSITION MIDDLE
+#define CURSOR_POSITION BOTTOM_RIGHT
 ///---Borders---///
 /*0) Outer border size. If you put this negative it will be a square.
  *1) Full borderwidth    2) Magnet border size
  *3) Resize border size  */
-static const uint8_t borders[] = {3,5,5,4};
+static const uint8_t borders[] = {4,8,5,4};
 /* Windows that won't have a border.*/
 #define LOOK_INTO "WM_NAME"
 static const char *ignore_names[] = {"bar", "xclock"};
 ///--Menus and Programs---///
-static const char *menucmd[]   = { "/usr/bin/gmrun", NULL };
-static const char *gmrun[]     = { "/usr/bin/gmrun",NULL};
-static const char *terminal[]  = { "urxvt", NULL };
-static const char *click1[]    = { "xdotool","click", "1", NULL };
-static const char *click2[]    = { "xdotool","click", "2", NULL };
-static const char *click3[]    = { "xdotool","click", "3", NULL };
-/* Example
-static const char *vol_up[]    = { "amixer", "set", "Master", "unmute", "3%+", "-q", NULL };
-static const char *vol_down[]  = { "amixer", "set", "Master", "unmute", "3%-", "-q", NULL };
-static const char *vol_mute[]  = { "amixer", "set", "Master", "mute", "-q", NULL };
-*/
+static const char *terminal[] = { "/usr/bin/urxvt", NULL };
+static const char *media_vol_up[] = { "pamixer", "-i", "5", NULL };
+static const char *media_vol_down[] = { "pamixer", "-d", "5", NULL };
+static const char *media_vol_mute[] = { "pamixer", "-t", NULL };
+static const char *media_vol_mic_mute[] = { "pactl", "set-source-mute", "1", "toggle", NULL };
+static const char *media_brightness_up[] = { "light", "-A", "3",  NULL };
+static const char *media_brightness_down[] = { "light", "-U", "3",  NULL };
+static const char *launcher[] = { "launcher", NULL };
+static const char *locker[] = { "my-favorite-things-locker", NULL };
+
 ///--Custom foo---///
 static void halfandcentered(const Arg *arg)
 {
@@ -174,34 +173,21 @@ static key keys[] = {
     {  MOD,               XK_t,          always_on_top,     {}},
     // Make the window stay on all workspaces
     {  MOD ,              XK_f,          fix,               {}},
-    // Move the cursor
-    {  MOD ,              XK_Up,         cursor_move,       {.i=TWOBWM_CURSOR_UP_SLOW}},
-    {  MOD ,              XK_Down,       cursor_move,       {.i=TWOBWM_CURSOR_DOWN_SLOW}},
-    {  MOD ,              XK_Right,      cursor_move,       {.i=TWOBWM_CURSOR_RIGHT_SLOW}},
-    {  MOD ,              XK_Left,       cursor_move,       {.i=TWOBWM_CURSOR_LEFT_SLOW}},
-    // Move the cursor faster
-    {  MOD |SHIFT,        XK_Up,         cursor_move,       {.i=TWOBWM_CURSOR_UP}},
-    {  MOD |SHIFT,        XK_Down,       cursor_move,       {.i=TWOBWM_CURSOR_DOWN}},
-    {  MOD |SHIFT,        XK_Right,      cursor_move,       {.i=TWOBWM_CURSOR_RIGHT}},
-    {  MOD |SHIFT,        XK_Left,       cursor_move,       {.i=TWOBWM_CURSOR_LEFT}},
     // Start programs
     {  MOD ,              XK_Return,     start,             {.com = terminal}},
-    {  MOD ,              XK_w,          start,             {.com = menucmd}},
-    {  MOD |SHIFT,        XK_w,          start,             {.com = gmrun}},
     // Exit or restart 2bwm
     {  MOD |CONTROL,      XK_q,          twobwm_exit,       {.i=0}},
     {  MOD |CONTROL,      XK_r,          twobwm_restart,    {.i=0}},
     {  MOD ,              XK_space,      halfandcentered,   {.i=0}},
-    // Fake clicks using xdotool
-    {  MOD |CONTROL,      XK_Up,         start,             {.com = click1}},
-    {  MOD |CONTROL,      XK_Down,       start,             {.com = click2}},
-	{  MOD |CONTROL,      XK_Right,      start,             {.com = click3}},
-/* example
-    {  0x000000,          0x1008ff13, start,             {.com = vol_up}},
-    {  0x000000,          0x1008ff11,  start,             {.com = vol_down}},
-    {  0x000000,          0x1008ff15, start,             {.com = vol_mute}},
-*/
-
+    // Custom
+    {  0x000000,          0x1008ff13,    start,             {.com = media_vol_up}},
+    {  0x000000,          0x1008ff11,    start,             {.com = media_vol_down}},
+    {  0x000000,          0x1008ff12,    start,             {.com = media_vol_mute}},
+    {  0x000000,          0x1008ffb2,    start,             {.com = media_vol_mic_mute}},
+    {  0x000000,          0x1008ff03,    start,             {.com = media_brightness_down}},
+    {  0x000000,          0x1008ff02,    start,             {.com = media_brightness_up}},
+    {  MOD |CONTROL |ALT, XK_l,          start,             {.com = locker}},
+    {  MOD,               XK_d,          start,             {.com = launcher}},
 
     // Change current workspace
        DESKTOPCHANGE(     XK_1,                             0)
@@ -210,15 +196,10 @@ static key keys[] = {
        DESKTOPCHANGE(     XK_4,                             3)
        DESKTOPCHANGE(     XK_5,                             4)
        DESKTOPCHANGE(     XK_6,                             5)
-       DESKTOPCHANGE(     XK_7,                             6)
-       DESKTOPCHANGE(     XK_8,                             7)
-       DESKTOPCHANGE(     XK_9,                             8)
-       DESKTOPCHANGE(     XK_0,                             9)
 };
 static Button buttons[] = {
     {  MOD        ,XCB_BUTTON_INDEX_1,     mousemotion,   {.i=TWOBWM_MOVE}},
     {  MOD        ,XCB_BUTTON_INDEX_3,     mousemotion,   {.i=TWOBWM_RESIZE}},
-    {  MOD|CONTROL,XCB_BUTTON_INDEX_3,     start,         {.com = menucmd}},
     {  MOD|SHIFT,  XCB_BUTTON_INDEX_1,     changeworkspace, {.i=0}},
     {  MOD|SHIFT,  XCB_BUTTON_INDEX_3,     changeworkspace, {.i=1}},
     {  MOD|ALT,    XCB_BUTTON_INDEX_1,     changescreen,    {.i=1}},
