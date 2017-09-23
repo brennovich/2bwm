@@ -37,7 +37,7 @@ static const uint8_t borders[] = {4,8,5,4};
 #define LOOK_INTO "WM_NAME"
 static const char *ignore_names[] = {"bar", "xclock"};
 ///--Menus and Programs---///
-static const char *terminal[] = { "/usr/bin/urxvt", NULL };
+static const char *terminal[] = { "/usr/bin/urxvtc", NULL };
 static const char *media_vol_up[] = { "pamixer", "-i", "5", NULL };
 static const char *media_vol_down[] = { "pamixer", "-d", "5", NULL };
 static const char *media_vol_mute[] = { "pamixer", "-t", NULL };
